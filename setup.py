@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="pytest-deltatest",
-    version="0.4.44",
+    version="0.4.45",
     description="Run only the tests affected by your code changes.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,7 +23,7 @@ setup(
             "delta=delta.cli:main",
         ],
         "pytest11": [
-            "delta.pytest_plugin = delta.pytest_plugin",
+            "delta = delta.pytest_plugin",
         ],
     },
     python_requires=">=3.8",
