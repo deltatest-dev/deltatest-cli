@@ -80,6 +80,11 @@ def run_test_chunk_with_mapping(
     import os
     env = os.environ.copy()
     env["DELTA_DISABLE"] = "1"
+    # Force ctrace backend on Python 3.12+ where coverage.py defaults to sysmon.
+    # sysmon only records the *first* test to hit each line, silently dropping
+    # all subsequent tests that share helpers — causing a severely incomplete map.
+    # ctrace is slower but correct: every test/line relationship is captured.
+    env["COVERAGE_CORE"] = "ctrace"
     
     result = subprocess.run(
         cmd,
@@ -191,6 +196,27 @@ def build_mapping_iteratively(
     """
     repo_root = repo_root.resolve()
     
+    # Clean up stale coverage files to avoid "Can't combine statement coverage data with branch data"
+    for p in repo_root.glob(".coverage.*"):
+        try:
+            p.unlink()
+        except Exception:
+            pass
+    if (repo_root / "coverage").exists():
+        for p in (repo_root / "coverage").glob(".coverage.*"):
+            try:
+                p.unlink()
+            except Exception:
+                pass
+    try:
+        (repo_root / ".coverage").unlink(missing_ok=True)
+    except Exception:
+        pass
+    try:
+        (repo_root / "coverage" / ".coverage").unlink(missing_ok=True)
+    except Exception:
+        pass
+
     if subprocess_mode:
         import sysconfig
         import os
@@ -228,6 +254,38 @@ def build_mapping_iteratively(
                 config_parser.add_section("run")
             config_parser.set("run", "parallel", "True")
             config_parser.set("run", "concurrency", "multiprocessing")
+
+            # Preserve branch coverage if defined in pyproject.toml or setup.cfg
+            has_branch = False
+            pyproject = repo_root / "pyproject.toml"
+            if pyproject.exists():
+                try:
+                    content = pyproject.read_text()
+                    in_section = False
+                    for line in content.splitlines():
+                        line_stripped = line.strip()
+                        if line_stripped.startswith("[") and line_stripped.endswith("]"):
+                            in_section = (line_stripped.replace(" ", "") == "[tool.coverage.run]")
+                        elif in_section and "branch" in line_stripped:
+                            parts = line_stripped.split("=")
+                            if len(parts) == 2 and "true" in parts[1].lower():
+                                has_branch = True
+                                break
+                except Exception:
+                    pass
+            setup_cfg = repo_root / "setup.cfg"
+            if not has_branch and setup_cfg.exists():
+                try:
+                    cfg = configparser.ConfigParser()
+                    cfg.read(setup_cfg)
+                    if cfg.has_option("coverage:run", "branch") and cfg.getboolean("coverage:run", "branch"):
+                        has_branch = True
+                except Exception:
+                    pass
+            if has_branch:
+                config_parser.set("run", "branch", "True")
+                print("   Preserved branch=True from project configuration")
+
             with open(coveragerc_file, "w") as f:
                 config_parser.write(f)
             print(f"   Updated {coveragerc_file} with parallel=True and concurrency=multiprocessing")

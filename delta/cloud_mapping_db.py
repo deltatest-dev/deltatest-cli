@@ -220,11 +220,11 @@ class CloudMappingDB:
 
         print(f"Pushing {len(mappings)} delta mappings to Delta...", flush=True)
 
+        stats_to_send = run_stats if run_stats else {"result": "passed"}
         payload_base = {
             "branch": self._branch,
+            "run_stats": stats_to_send,
         }
-        if run_stats:
-            payload_base["run_stats"] = run_stats
 
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
