@@ -2,10 +2,6 @@
 
 **Run only the tests affected by your code changes** - automatically!
 
-![Delta Coverage Demo](https://github.com/deltatest-org/vscode-deltatest/raw/HEAD/media/t1.gif)
-
-*Get the [Delta Coverage VS Code Extension](https://marketplace.visualstudio.com/items?itemName=deltatest.delta-coverage) for inline coverage highlights directly in your editor.*
-
 Delta integrates with your git workflow as a pre-commit hook, running only tests that cover the code you've changed. This dramatically speeds up your development cycle while ensuring quality.
 
 ## Key Features
@@ -248,6 +244,14 @@ For urgent commits:
 ```bash
 git commit --no-verify -m "Urgent hotfix"
 ```
+
+## VS Code Extension
+
+An official VS Code extension is available to visualize coverage highlights directly in your editor.
+
+![Delta Coverage Demo](https://github.com/deltatest-org/vscode-deltatest/raw/HEAD/media/t1.gif)
+
+Get the [Delta Coverage VS Code Extension](https://marketplace.visualstudio.com/items?itemName=deltatest.delta-coverage) on the VS Code Marketplace.
 
 ## Contributing
 
