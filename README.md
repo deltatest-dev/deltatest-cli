@@ -4,6 +4,16 @@
 
 Delta integrates with your git workflow as a pre-commit hook, running only tests that cover the code you've changed. This dramatically speeds up your development cycle while ensuring quality.
 
+## Quick Links
+
+- [Key Features](#key-features)
+- [How It Works](#-how-it-works)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Commands](#commands)
+- [VS Code Extension](#vs-code-extension)
+- [Contributing](#contributing)
+
 ## Key Features
 
 - **Fast**: Run only affected tests, not the entire suite
